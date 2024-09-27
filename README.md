@@ -227,6 +227,8 @@ kubectl logs efs-csi-controller-74ccf9f566-q5989 \
 kubectl get pv && kubectl get pvc && kubectl get pods -o wide
 
 
+
+
     
 
 
