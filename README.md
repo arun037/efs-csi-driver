@@ -41,17 +41,6 @@ annotations:
 
     vi efs-service-account.yaml && k create -f efs-service-account.yaml && k get sa -n kube-system
 
-    ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    app.kubernetes.io/name: aws-efs-csi-driver
-  name: efs-csi-controller-sa
-  namespace: kube-system
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::381491904201:role/AmazonEKS_EFS_CSI_DriverRole
-
 
 Step 10:- Under the "Get the Amazon EFS CSI driver", self-managed installation of the Amazon EFS CSI driver link has been given . Need to click on the link ,It will route to https://github.com/kubernetes-sigs/aws-efs-csi-driver/blob/master/docs/README.md#installation
 
@@ -66,14 +55,6 @@ Step 12:- sed -i.bak -e 's|us-west-2|region-code|' private-ecr-driver.yaml  (Nee
 Step 13:- sed -i.bak -e 's|602401143452|account|' private-ecr-driver.yaml  (Need to change the account# which can be found on the right top corner of the aws ui)
 
 Step 14:- Since we have already created the service account on the step 9, open the private-ecr-driver.yaml which was downloaded on the step 11, need to remove the first yaml manifest for efs-csi-controller-sa
-
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    app.kubernetes.io/name: aws-efs-csi-driver
-  name: efs-csi-controller-sa
-  namespace: kube-system
 
   this needs to be deleted.
 
@@ -171,45 +152,6 @@ Step 2:- curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-efs-csi-d
 
 Step 3:- open the storageclass.yaml file and edit with the filesystem id
 and k apply -f storageclass.yaml
-
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: efs-claim
-spec:
-  accessModes:
-  - ReadWriteMany
-  storageClassName: efs-sc
-  resources:
-    requests:
-      storage: 5Gi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: efs-app
-spec:
-  replicas: 5 # You can adjust this number based on your requirements
-  selector:
-    matchLabels:
-      app: efs-app
-  template:
-    metadata:
-      labels:
-        app: efs-app
-    spec:
-      containers:
-      - name: app
-        image: centos
-        command: ["/bin/sh"]
-        args: ["-c", "while true; do echo $(date -u) >> /data/out; sleep 5; done"]
-        volumeMounts:
-        - name: persistent-storage
-          mountPath: /data
-      volumes:
-      - name: persistent-storage
-        persistentVolumeClaim:
-          claimName: efs-claim
 
 k create deployment-pvc.yaml
 
